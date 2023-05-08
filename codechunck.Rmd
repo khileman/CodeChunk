@@ -1,0 +1,69 @@
+---
+title: "Code Chunk"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+## Notes on code 
+I created this code to use when sectioning off data. The code takes the top 5 and bottom 5 ranking data points, color codes them and then labels them. It is useful when looking at data with data points that occur in similar places and you want to know which points lie at the poles. 
+
+"Label" in the initial line of code directs R on which variable should be used as the label and then you can see the colors used here for the different sections. 
+
+```{r, include=FALSE}
+knitr::opts_chunk$set(warning = FALSE, message = FALSE)
+
+
+library(haven)
+library(knitr)
+library(tidyverse)
+library(scales)
+library(ggplot2)
+library(patchwork)
+library(dplyr)
+library(ggplot2)
+library(ggrepel)
+
+df = read.csv('CTHI_2021_Main_Results.csv')
+df1 = read.csv('fsi_2022_main_results.csv') 
+colnames(df1)[2] = 'ISO.2'
+colnames(df1)[13] = 'FSI Rank'
+df2 <- full_join(df, df1,
+          by = join_by("ISO.2"))
+na.omit(df2)
+df3 <- df2 %>% distinct()
+colnames(df3)[21] = 'FSI Score'
+```
+
+
+```{r codechunk, echo = TRUE}
+p <- ggplot(data = df, aes(x = Rank, y = Haven.Score, label = ISO.2)) +
+  geom_point(color = case_when(
+             df$Rank >= 65 ~ 'dodgerblue',
+             df$Rank <= 5 ~ 'forestgreen',
+             TRUE ~ 'slateblue1'), 
+               size = 3, alpha = 0.8) +
+  geom_text_repel(data          = subset(df, Rank >= 65),
+                  nudge_y       = 32 - subset(df, Rank >= 65)$Rank,
+                  size          = 4,
+                  box.padding   = 1.5,
+                  point.padding = 0.5,
+                  force         = 100,
+                  segment.size  = 0.2,
+                  segment.color = "grey50",
+                  direction     = "x") +
+  geom_text_repel(data          = subset(df, Rank <= 5),
+                  nudge_y       = 32 - subset(df, Rank <= 5)$Rank,
+                  size          = 4,
+                  box.padding   = 1.5,
+                  point.padding = 0.5,
+                  force         = 100,
+                  segment.size  = 0.2,
+                  segment.color = "grey50",
+                  direction     = "x")
+```
+
+
